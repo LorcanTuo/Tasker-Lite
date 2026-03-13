@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Reports - {{ cfg.APP_NAME }}{% endblock %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-bar-chart-line"></i> Reports</h4>
+
+<div class="row g-4">
+
+    <!-- Summary Report -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-file-earmark-bar-graph"></i> Summary Report</div>
+            <div class="card-body">
+                <p class="text-muted small">Generate a summary table with category breakdown for a given period.</p>
+                <form method="get" action="{{ url_for('generate_report') }}">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">Start Date</label>
+                            <input type="date" name="start" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">End Date</label>
+                            <input type="date" name="end" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-file-earmark-bar-graph"></i> Generate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- R Analytics Report -->
+    <div class="col-md-6">
+        <div class="card h-100 border-success">
+            <div class="card-header fw-semibold text-success"><i class="bi bi-bar-chart-steps"></i> R Analytics Report <span class="badge bg-success ms-1">ggplot2</span></div>
+            <div class="card-body">
+                <p class="text-muted small">Generate visual charts using R and ggplot2 — includes timeline, category breakdown, status and area charts.</p>
+                <form method="get" action="{{ url_for('r_report') }}">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">Start Date</label>
+                            <input type="date" name="start" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">End Date</label>
+                            <input type="date" name="end" class="form-control form-control-sm" required>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-r-circle"></i> Generate R Report
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-2">
+                    <small class="text-muted"><i class="bi bi-info-circle"></i> Requires <a href="https://cran.r-project.org/" target="_blank" rel="noopener">R</a> with <code>ggplot2</code> and <code>scales</code> installed.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export to Excel -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold"><i class="bi bi-file-earmark-excel"></i> Export to Excel</div>
+            <div class="card-body">
+                <p class="text-muted small">Export data to a formatted Excel file.</p>
+                <form method="get" action="{{ url_for('export_excel') }}">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">Start Date <span class="text-muted">(optional)</span></label>
+                            <input type="date" name="start" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">End Date <span class="text-muted">(optional)</span></label>
+                            <input type="date" name="end" class="form-control form-control-sm">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-download"></i> Export Excel
+                        </button>
+                        <small class="text-muted ms-2">Leave blank for all data</small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

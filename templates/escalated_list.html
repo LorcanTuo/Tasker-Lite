@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ cfg.ESCALATED_LABEL }} - {{ cfg.APP_NAME }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="{{ cfg.ESCALATED_ICON }}"></i> {{ cfg.ESCALATED_LABEL }}</h4>
+    <a href="{{ url_for('escalated_new') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Log New</a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label small mb-0">Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for s in statuses %}
+                    <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-0">Area</label>
+                <select name="area" class="form-select form-select-sm">
+                    <option value="">All</option>
+                    {% for a in areas %}
+                    <option value="{{ a }}" {% if area_filter == a %}selected{% endif %}>{{ a }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small mb-0">Search</label>
+                <input type="text" name="search" class="form-control form-control-sm" value="{{ search }}" placeholder="Description, person, ticket no...">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('escalated_list') }}" class="btn btn-sm btn-outline-secondary w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th><th>Area</th><th>Building</th><th>Description</th>
+                        <th>Reported By</th><th>{{ cfg.ESCALATED_NUMBER_LABEL }}</th><th>Status</th><th>Resolved</th><th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.date }}</td>
+                    <td><span class="badge bg-secondary">{{ item.area }}</span></td>
+                    <td>{{ item.building }}</td>
+                    <td title="{{ item.description }}">{{ item.description[:50] }}{% if item.description|length > 50 %}...{% endif %}</td>
+                    <td>{{ item.reported_by }}</td>
+                    <td>{{ item.ticket_number }}</td>
+                    <td>
+                        {% if item.status == 'RESOLVED' %}
+                        <span class="badge bg-success">RESOLVED</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">IN PROGRESS</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.resolved_date or '' }}</td>
+                    <td class="text-nowrap">
+                        <a href="{{ url_for('escalated_edit', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                        {% if item.status != 'RESOLVED' %}
+                        <form method="post" action="{{ url_for('escalated_resolve', item_id=item.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-success" title="Resolve"><i class="bi bi-check-lg"></i></button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted small">{{ items|length }} record(s)</div>
+</div>
+{% endblock %}

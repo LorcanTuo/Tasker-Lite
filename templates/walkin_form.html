@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if item else 'New' }} {{ cfg.WALKIN_LABEL_SINGULAR }} - {{ cfg.APP_NAME }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="bi bi-{{ 'pencil' if item else 'plus-circle' }}"></i> {{ 'Edit' if item else 'Log New' }} {{ cfg.WALKIN_LABEL_SINGULAR }}</h4>
+    <a href="{{ url_for('walkin_list') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to List</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Date <span class="text-danger">*</span></label>
+                    <input type="date" name="date" class="form-control" value="{{ item.date if item else today }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Category <span class="text-danger">*</span></label>
+                    <input type="text" name="category" class="form-control" list="category-suggestions"
+                           value="{{ item.category if item else '' }}" placeholder="Type or choose a category" required>
+                    <datalist id="category-suggestions">
+                        {% for t in categories %}
+                        <option value="{{ t }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" name="location" class="form-control" value="{{ item.location if item else '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Reported By</label>
+                    <input type="text" name="reported_by" class="form-control" value="{{ item.reported_by if item else '' }}">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Description <span class="text-danger">*</span></label>
+                    <textarea name="description" class="form-control" rows="2" required>{{ item.description if item else '' }}</textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Additional Info</label>
+                    <textarea name="additional_info" class="form-control" rows="2">{{ item.additional_info if item else '' }}</textarea>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Assigned To</label>
+                    <input type="hidden" name="assigned_to" id="assigned-hidden" value="{{ item.assigned_to if item else '' }}">
+                    <div id="assigned-container" class="form-control d-flex flex-wrap gap-1 align-items-center" style="min-height:38px; cursor:text;" onclick="document.getElementById('assigned-input').focus()">
+                    </div>
+                    <input type="text" id="assigned-input" class="form-control mt-1" list="assigned-suggestions"
+                           placeholder="Type a name, press Enter or comma to add…" autocomplete="off">
+                    <datalist id="assigned-suggestions">
+                        {% for s in assigned_suggestions %}
+                        <option value="{{ s }}">
+                        {% endfor %}
+                    </datalist>
+                    <div class="form-text">Add multiple people. Press <kbd>Enter</kbd> or <kbd>,</kbd> to confirm each name.</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {% if item and item.status == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Resolved Date</label>
+                    <input type="date" name="resolved_date" class="form-control" value="{{ item.resolved_date if item and item.resolved_date else '' }}">
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> {{ 'Update' if item else 'Log Ticket' }}</button>
+                <a href="{{ url_for('walkin_list') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    #assigned-container .tag {
+        background: {{ cfg.APP_COLOUR }}; color: #fff;
+        padding: 2px 8px; border-radius: 12px;
+        font-size: .82rem; display: flex; align-items: center; gap: 4px;
+        white-space: nowrap;
+    }
+    #assigned-container .tag .remove-tag {
+        cursor: pointer; font-size: 1rem; line-height: 1; opacity: .7;
+    }
+    #assigned-container .tag .remove-tag:hover { opacity: 1; }
+</style>
+<script>
+(function () {
+    const container = document.getElementById('assigned-container');
+    const input     = document.getElementById('assigned-input');
+    const hidden    = document.getElementById('assigned-hidden');
+    let tags = [];
+
+    function buildContainer() {
+        container.innerHTML = '';
+        tags.forEach((tag, i) => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.innerHTML = `${tag} <span class="remove-tag" data-i="${i}">&times;</span>`;
+            container.appendChild(span);
+        });
+        hidden.value = tags.join(', ');
+    }
+
+    function addTag(val) {
+        val = val.trim().replace(/,+$/, '').trim();
+        if (val && !tags.map(t => t.toLowerCase()).includes(val.toLowerCase())) {
+            tags.push(val);
+            buildContainer();
+        }
+        input.value = '';
+    }
+
+    container.addEventListener('click', function (e) {
+        const r = e.target.closest('.remove-tag');
+        if (r) {
+            tags.splice(parseInt(r.dataset.i), 1);
+            buildContainer();
+        } else {
+            input.focus();
+        }
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addTag(input.value);
+        } else if (e.key === 'Backspace' && input.value === '' && tags.length) {
+            tags.pop();
+            buildContainer();
+        }
+    });
+
+    input.addEventListener('blur', function () {
+        if (input.value.trim()) addTag(input.value);
+    });
+
+    const initial = hidden.value;
+    if (initial) {
+        initial.split(',').forEach(v => { v = v.trim(); if (v) tags.push(v); });
+        buildContainer();
+    }
+})();
+</script>
+{% endblock %}

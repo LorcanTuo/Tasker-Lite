@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}R Report {{ start }} to {{ end }} – {{ cfg.APP_NAME }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0"><i class="bi bi-bar-chart-steps"></i> R Analytics Report</h4>
+        <small class="text-muted">{{ start }} &rarr; {{ end }}</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('export_excel', start=start, end=end) }}" class="btn btn-success btn-sm">
+            <i class="bi bi-file-earmark-excel"></i> Export Excel
+        </a>
+        <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Reports
+        </a>
+    </div>
+</div>
+
+<!-- Counts row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card text-center py-3">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-primary">{{ walkin_count }}</div>
+                <div class="text-muted small text-uppercase mt-1">{{ cfg.WALKIN_LABEL }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-center py-3">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-danger">{{ escalated_count }}</div>
+                <div class="text-muted small text-uppercase mt-1">{{ cfg.ESCALATED_LABEL }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not charts %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i>
+    No charts were generated — there may be no data in this date range.
+</div>
+{% endif %}
+
+<!-- Charts grid -->
+<div class="row g-4">
+
+    {% if charts.chart_timeline %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-graph-up"></i> {{ cfg.WALKIN_LABEL }} Over Time
+            </div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ charts.chart_timeline }}"
+                     class="img-fluid" style="max-width:900px;"
+                     alt="Tickets over time chart">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if charts.chart_status %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-pie-chart"></i> Status Breakdown by Type
+            </div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ charts.chart_status }}"
+                     class="img-fluid"
+                     alt="Status breakdown chart">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if charts.chart_categories %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-tags"></i> {{ cfg.WALKIN_LABEL }} by Category
+            </div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ charts.chart_categories }}"
+                     class="img-fluid"
+                     alt="Tickets by category chart">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if charts.chart_escalated_area %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-semibold">
+                <i class="bi bi-geo-alt"></i> {{ cfg.ESCALATED_LABEL }} by Area
+            </div>
+            <div class="card-body text-center">
+                <img src="data:image/png;base64,{{ charts.chart_escalated_area }}"
+                     class="img-fluid"
+                     alt="Escalated by area chart">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<div class="mt-4 text-muted small">
+    <i class="bi bi-r-circle"></i> Charts generated with R / ggplot2
+</div>
+{% endblock %}

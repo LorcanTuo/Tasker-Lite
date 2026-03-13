@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - {{ cfg.APP_NAME }}{% endblock %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="number text-primary">{{ walkin_today }}</div>
+            <div class="label">Logged Today</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="number text-warning">{{ walkin_open }}</div>
+            <div class="label">{{ cfg.WALKIN_LABEL }} In Progress</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="number text-danger">{{ escalated_open }}</div>
+            <div class="label">{{ cfg.ESCALATED_LABEL }} Open</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card stat-card">
+            <div class="number">{{ walkin_total }}</div>
+            <div class="label">Total {{ cfg.WALKIN_LABEL }}</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card stat-card">
+            <div class="number">{{ escalated_total }}</div>
+            <div class="label">Total {{ cfg.ESCALATED_LABEL }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick entry buttons -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <a href="{{ url_for('walkin_new') }}" class="btn btn-primary w-100 py-3"><i class="{{ cfg.WALKIN_ICON }}"></i> Log {{ cfg.WALKIN_LABEL_SINGULAR }}</a>
+    </div>
+    <div class="col-md-6">
+        <a href="{{ url_for('escalated_new') }}" class="btn btn-outline-primary w-100 py-3"><i class="{{ cfg.ESCALATED_ICON }}"></i> Log {{ cfg.ESCALATED_LABEL_SINGULAR }}</a>
+    </div>
+</div>
+
+<!-- Recent walk-in tickets -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong><i class="{{ cfg.WALKIN_ICON }}"></i> Recent {{ cfg.WALKIN_LABEL }}</strong>
+        <a href="{{ url_for('walkin_list') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr>
+                <th>Date</th><th>Category</th><th>Description</th><th>Reported By</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+            {% for item in recent_walkin %}
+            <tr>
+                <td>{{ item.date }}</td>
+                <td><span class="badge bg-secondary">{{ item.category }}</span></td>
+                <td>{{ item.description[:60] }}{% if item.description|length > 60 %}...{% endif %}</td>
+                <td>{{ item.reported_by }}</td>
+                <td>
+                    {% if item.status == 'RESOLVED' %}
+                    <span class="badge bg-success">RESOLVED</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">IN PROGRESS</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('walkin_edit', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                    {% if item.status != 'RESOLVED' %}
+                    <form method="post" action="{{ url_for('walkin_resolve', item_id=item.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark Resolved"><i class="bi bi-check-lg"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recent escalated tickets -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong><i class="{{ cfg.ESCALATED_ICON }}"></i> Recent {{ cfg.ESCALATED_LABEL }}</strong>
+        <a href="{{ url_for('escalated_list') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Date</th><th>Area</th><th>Description</th><th>{{ cfg.ESCALATED_NUMBER_LABEL }}</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for item in recent_escalated %}
+            <tr>
+                <td>{{ item.date }}</td>
+                <td><span class="badge bg-secondary">{{ item.area }}</span></td>
+                <td>{{ item.description[:50] }}{% if item.description|length > 50 %}...{% endif %}</td>
+                <td>{{ item.ticket_number }}</td>
+                <td>
+                    {% if item.status == 'RESOLVED' %}
+                    <span class="badge bg-success">RESOLVED</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">IN PROGRESS</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Report {{ start }} to {{ end }} - {{ cfg.APP_NAME }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="bi bi-bar-chart-line"></i> Report: {{ start }} to {{ end }}</h4>
+    <div>
+        <a href="{{ url_for('export_excel', start=start, end=end) }}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+        <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary btn-sm ms-1"><i class="bi bi-arrow-left"></i> New Report</a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">{{ cfg.WALKIN_LABEL }}</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td>Raised</td><td class="text-end fw-bold">{{ walkin_raised }}</td></tr>
+                    <tr><td>Completed</td><td class="text-end text-success fw-bold">{{ walkin_resolved }}</td></tr>
+                    <tr><td>In Progress</td><td class="text-end text-warning fw-bold">{{ walkin_in_progress }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">{{ cfg.ESCALATED_LABEL }}</div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td>Raised</td><td class="text-end fw-bold">{{ escalated_raised }}</td></tr>
+                    <tr><td>Completed</td><td class="text-end text-success fw-bold">{{ escalated_resolved }}</td></tr>
+                    <tr><td>In Progress</td><td class="text-end text-warning fw-bold">{{ escalated_in_progress }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Breakdown -->
+{% if category_counts %}
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-tags"></i> {{ cfg.WALKIN_LABEL }} by Category</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0">
+                <thead class="table-dark">
+                    <tr><th>Category</th><th class="text-end">Count</th><th style="width: 60%;">Distribution</th></tr>
+                </thead>
+                <tbody>
+                {% for cat, count in category_counts %}
+                <tr>
+                    <td>{{ cat }}</td>
+                    <td class="text-end">{{ count }}</td>
+                    <td>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" style="width: {{ (count / walkin_raised * 100) if walkin_raised else 0 }}%">
+                                {{ "%.1f"|format(count / walkin_raised * 100) if walkin_raised else 0 }}%
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Detail Tables -->
+<div class="accordion" id="reportDetails">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#walkinDetail">
+                {{ cfg.WALKIN_LABEL }} Detail ({{ walkin_raised }})
+            </button>
+        </h2>
+        <div id="walkinDetail" class="accordion-collapse collapse" data-bs-parent="#reportDetails">
+            <div class="accordion-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead><tr><th>Date</th><th>Category</th><th>Location</th><th>Description</th><th>Status</th></tr></thead>
+                        <tbody>
+                        {% for item in walkin_items %}
+                        <tr>
+                            <td>{{ item.date }}</td><td>{{ item.category }}</td>
+                            <td>{{ item.location }}</td>
+                            <td>{{ item.description[:60] }}{% if item.description|length > 60 %}...{% endif %}</td>
+                            <td>{{ item.status }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#escalatedDetail">
+                {{ cfg.ESCALATED_LABEL }} Detail ({{ escalated_raised }})
+            </button>
+        </h2>
+        <div id="escalatedDetail" class="accordion-collapse collapse" data-bs-parent="#reportDetails">
+            <div class="accordion-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead><tr><th>Date</th><th>Area</th><th>Building</th><th>Description</th><th>{{ cfg.ESCALATED_NUMBER_LABEL }}</th><th>Status</th></tr></thead>
+                        <tbody>
+                        {% for item in escalated_items %}
+                        <tr>
+                            <td>{{ item.date }}</td><td>{{ item.area }}</td>
+                            <td>{{ item.building }}</td>
+                            <td>{{ item.description[:60] }}{% if item.description|length > 60 %}...{% endif %}</td>
+                            <td>{{ item.ticket_number }}</td><td>{{ item.status }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
