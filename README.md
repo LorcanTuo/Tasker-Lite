@@ -8,6 +8,16 @@ A lightweight, configurable **IT ticket tracker** built with Flask and SQLite. D
 
 > **📖 [Full documentation available on the Wiki](https://github.com/LorcanTuo/Tasker-Lite/wiki)**
 
+> **⚠️ Experimental Branch (`testing`)** — This branch contains new notification and service integration features that are under active development. These features may change, break, or be removed without notice. Do not use in production without thorough testing.
+
+## What's New on This Branch
+
+- **Email Notifications (SMTP)** — Automatically email the affected user when a ticket is created, updated, or resolved via the new **Contact Email** field on both ticket types.
+- **Discord Webhook Integration** — Post ticket events to a Discord channel with optional role @mentions.
+- **Pluggable Notification Architecture** — New `notifications.py` module makes it straightforward to add further integrations (Slack, Teams, etc.) in the future.
+- **Contact Email Field** — Both walk-in and escalated tickets now have an optional `contact_email` field, stored in the database and included in Excel exports.
+- **Database Auto-Migration** — Existing databases are automatically upgraded with the new column on startup.
+
 ## Features
 
 - **Walk-in / Phone-in Tickets** — Log day-to-day requests from users who walk in or call.
@@ -61,14 +71,31 @@ All settings live in [`config.py`](config.py). Edit it to match your organisatio
 
 See the file for the full list of options.
 
+### Notification Settings (this branch only)
+
+| Setting | Default | Purpose |
+|---|---|---|
+| `NOTIFICATIONS_ENABLED` | `False` | Master switch for all notifications |
+| `EMAIL_ENABLED` | `False` | Enable SMTP email notifications |
+| `EMAIL_SMTP_HOST` | `"smtp.example.com"` | SMTP server hostname |
+| `EMAIL_SMTP_PORT` | `587` | SMTP port |
+| `EMAIL_USE_TLS` | `True` | Use STARTTLS |
+| `EMAIL_USERNAME` | `""` | SMTP login username |
+| `EMAIL_PASSWORD` | `""` | SMTP password |
+| `EMAIL_FROM` | `"it-tasker@example.com"` | Sender address |
+| `DISCORD_ENABLED` | `False` | Enable Discord webhook notifications |
+| `DISCORD_WEBHOOK_URL` | `""` | Discord webhook URL |
+
 ## Project Structure
 
 ```
-├── app.py           # Flask routes and business logic
-├── config.py        # All configurable settings
-├── models.py        # SQLite schema and database helpers
-├── report.R         # Optional R analytics chart generator
-├── templates/       # Jinja2 HTML templates (Bootstrap 5)
+├── app.py              # Flask routes and business logic
+├── config.py           # All configurable settings (incl. notification config)
+├── models.py           # SQLite schema, database helpers, and migrations
+├── notifications.py    # Pluggable email & Discord notification channels
+├── requirements.txt    # Python dependencies
+├── report.R            # Optional R analytics chart generator
+├── templates/          # Jinja2 HTML templates (Bootstrap 5)
 └── README.md
 ```
 
