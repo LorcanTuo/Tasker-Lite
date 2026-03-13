@@ -5,7 +5,9 @@ from werkzeug.security import generate_password_hash
 
 def _db_path():
     from config import DATABASE_NAME
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), DATABASE_NAME)
+    base_dir = os.environ.get('DATABASE_PATH',
+                              os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_dir, DATABASE_NAME)
 
 def get_db():
     conn = sqlite3.connect(_db_path())

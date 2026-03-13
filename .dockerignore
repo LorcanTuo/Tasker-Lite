@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+.env
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.git/
+wiki/
+Tasker-Lite.wiki/
+*.md
+!requirements.txt

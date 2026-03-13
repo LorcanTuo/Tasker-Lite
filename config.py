@@ -4,6 +4,7 @@
 # Edit this file to customise the app for your team.
 # Changes take effect on restart (or immediately in debug mode on save).
 # ──────────────────────────────────────────────────────────────────────────────
+import os
 
 # ── Branding ──────────────────────────────────────────────────────────────────
 APP_NAME = "IT Tasker"                     # Shown in navbar, login page, titles
@@ -12,12 +13,12 @@ APP_COLOUR = "#1a3a5c"                     # Primary navbar / header colour
 APP_COLOUR_DARK = "#0d1f33"                # Navbar colour in dark mode
 
 # ── Secret key (change this for production!) ──────────────────────────────────
-SECRET_KEY = "change-me-to-something-random"
+SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-to-something-random")
 
 # ── Server ────────────────────────────────────────────────────────────────────
-HOST = "127.0.0.1"
-PORT = 5001
-DEBUG = True
+HOST = os.environ.get("HOST", "127.0.0.1") # Use "0.0.0.0" in Docker
+PORT = int(os.environ.get("PORT", 5001))
+DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 
 # ── Walk-in Tickets (daily / phone-in / walk-in requests) ────────────────────
 WALKIN_LABEL = "Walk-in Tickets"           # Sidebar & page heading

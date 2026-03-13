@@ -1,0 +1,16 @@
+services:
+  tasker:
+    build: .
+    container_name: it-tasker
+    ports:
+      - "5001:5001"
+    volumes:
+      - tasker-data:/app/data
+    environment:
+      - SECRET_KEY=change-me-to-something-random
+      - HOST=0.0.0.0
+      - DEBUG=false
+    restart: unless-stopped
+
+volumes:
+  tasker-data:
