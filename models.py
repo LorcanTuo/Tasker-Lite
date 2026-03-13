@@ -24,6 +24,7 @@ def init_db():
             location TEXT,
             description TEXT,
             reported_by TEXT,
+            contact_email TEXT,
             additional_info TEXT,
             assigned_to TEXT,
             resolved_date TEXT,
@@ -40,6 +41,7 @@ def init_db():
             office TEXT,
             description TEXT,
             reported_by TEXT,
+            contact_email TEXT,
             escalated_by TEXT,
             ticket_number TEXT,
             escalation_date TEXT,
@@ -62,6 +64,13 @@ def init_db():
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
     ''')
+    conn.commit()
+
+    # ── Migrations: add columns that may not exist in older databases ─────────
+    for table in ('walkin_tickets', 'escalated_tickets'):
+        cols = [r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+        if 'contact_email' not in cols:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN contact_email TEXT")
     conn.commit()
 
     # Seed a default admin user if no users exist

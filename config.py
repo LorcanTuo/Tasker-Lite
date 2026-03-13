@@ -43,3 +43,26 @@ STATUSES = ["IN PROGRESS", "RESOLVED"]
 
 # ── Database ──────────────────────────────────────────────────────────────────
 DATABASE_NAME = "it_tasker.db"             # SQLite file, created alongside app.py
+
+# ── Notifications ─────────────────────────────────────────────────────────────
+# Enable/disable individual notification channels.
+# Each channel only fires if enabled AND properly configured below.
+
+NOTIFICATIONS_ENABLED = False              # Master switch — set True to activate
+
+# ── Email (SMTP) ──────────────────────────────────────────────────────────────
+EMAIL_ENABLED = False
+EMAIL_SMTP_HOST = "smtp.example.com"
+EMAIL_SMTP_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USERNAME = ""                        # SMTP login
+EMAIL_PASSWORD = ""                        # SMTP password (use env var in prod)
+EMAIL_FROM = "it-tasker@example.com"       # Sender address
+EMAIL_SUBJECT_PREFIX = "[IT Tasker]"       # Prepended to every subject line
+
+# ── Discord Webhook ───────────────────────────────────────────────────────────
+DISCORD_ENABLED = False
+DISCORD_WEBHOOK_URL = ""                   # Full webhook URL from Discord channel settings
+DISCORD_BOT_NAME = "IT Tasker"             # Display name in Discord
+DISCORD_MENTION_ROLE = ""                  # Optional: Discord role ID to @mention (e.g. "123456789")
+

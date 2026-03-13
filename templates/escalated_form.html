@@ -41,6 +41,13 @@
                     <input type="text" name="reported_by" class="form-control" value="{{ item.reported_by if item else '' }}">
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" name="contact_email" class="form-control" value="{{ item.contact_email if item and item.contact_email else '' }}" placeholder="user@example.com">
+                    {% if cfg.NOTIFICATIONS_ENABLED and cfg.EMAIL_ENABLED %}
+                    <div class="form-text"><i class="bi bi-envelope"></i> A notification will be sent to this address.</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
                     <label class="form-label">{{ cfg.ESCALATED_RAISED_BY_LABEL }}</label>
                     <input type="text" name="escalated_by" class="form-control" value="{{ item.escalated_by if item else '' }}">
                 </div>

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import get_db, init_db
+from notifications import notify_ticket
 from datetime import datetime, date, timedelta
 import config
 import io
@@ -119,14 +120,15 @@ def walkin_new():
     if request.method == 'POST':
         db = get_db()
         db.execute('''INSERT INTO walkin_tickets
-            (date, category, location, description, reported_by, additional_info, assigned_to, resolved_date, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (date, category, location, description, reported_by, contact_email, additional_info, assigned_to, resolved_date, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (
                 request.form['date'],
                 request.form['category'],
                 request.form.get('location', ''),
                 request.form['description'],
                 request.form.get('reported_by', ''),
+                request.form.get('contact_email', ''),
                 request.form.get('additional_info', ''),
                 request.form.get('assigned_to', ''),
                 request.form.get('resolved_date', '') or None,
@@ -134,6 +136,13 @@ def walkin_new():
             ))
         db.commit()
         db.close()
+        notify_ticket(
+            config.WALKIN_LABEL_SINGULAR, 'created',
+            request.form['description'],
+            contact_email=request.form.get('contact_email', ''),
+            reported_by=request.form.get('reported_by', ''),
+            category=request.form.get('category', ''),
+        )
         flash(f'{config.WALKIN_LABEL_SINGULAR} logged.', 'success')
         return redirect(url_for('walkin_list'))
     db = get_db()
@@ -154,7 +163,7 @@ def walkin_edit(item_id):
     if request.method == 'POST':
         db.execute('''UPDATE walkin_tickets SET
             date=?, category=?, location=?, description=?, reported_by=?,
-            additional_info=?, assigned_to=?, resolved_date=?, status=?, updated_at=datetime('now')
+            contact_email=?, additional_info=?, assigned_to=?, resolved_date=?, status=?, updated_at=datetime('now')
             WHERE id=?''',
             (
                 request.form['date'],
@@ -162,6 +171,7 @@ def walkin_edit(item_id):
                 request.form.get('location', ''),
                 request.form['description'],
                 request.form.get('reported_by', ''),
+                request.form.get('contact_email', ''),
                 request.form.get('additional_info', ''),
                 request.form.get('assigned_to', ''),
                 request.form.get('resolved_date', '') or None,
@@ -170,6 +180,12 @@ def walkin_edit(item_id):
             ))
         db.commit()
         db.close()
+        notify_ticket(
+            config.WALKIN_LABEL_SINGULAR, 'updated',
+            request.form['description'],
+            contact_email=request.form.get('contact_email', ''),
+            reported_by=request.form.get('reported_by', ''),
+        )
         flash(f'{config.WALKIN_LABEL_SINGULAR} updated.', 'success')
         return redirect(url_for('walkin_list'))
     item = db.execute("SELECT * FROM walkin_tickets WHERE id=?", (item_id,)).fetchone()
@@ -221,8 +237,8 @@ def escalated_new():
     if request.method == 'POST':
         db = get_db()
         db.execute('''INSERT INTO escalated_tickets
-            (date, area, building, office, description, reported_by, escalated_by, ticket_number, escalation_date, additional_info, resolved_date, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+            (date, area, building, office, description, reported_by, contact_email, escalated_by, ticket_number, escalation_date, additional_info, resolved_date, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (
                 request.form['date'],
                 request.form['area'],
@@ -230,6 +246,7 @@ def escalated_new():
                 request.form.get('office', ''),
                 request.form['description'],
                 request.form.get('reported_by', ''),
+                request.form.get('contact_email', ''),
                 request.form.get('escalated_by', ''),
                 request.form.get('ticket_number', ''),
                 request.form.get('escalation_date', '') or None,
@@ -239,6 +256,13 @@ def escalated_new():
             ))
         db.commit()
         db.close()
+        notify_ticket(
+            config.ESCALATED_LABEL_SINGULAR, 'created',
+            request.form['description'],
+            contact_email=request.form.get('contact_email', ''),
+            reported_by=request.form.get('reported_by', ''),
+            ticket_number=request.form.get('ticket_number', ''),
+        )
         flash(f'{config.ESCALATED_LABEL_SINGULAR} logged.', 'success')
         return redirect(url_for('escalated_list'))
     db = get_db()
@@ -257,7 +281,7 @@ def escalated_edit(item_id):
     if request.method == 'POST':
         db.execute('''UPDATE escalated_tickets SET
             date=?, area=?, building=?, office=?, description=?, reported_by=?,
-            escalated_by=?, ticket_number=?, escalation_date=?, additional_info=?,
+            contact_email=?, escalated_by=?, ticket_number=?, escalation_date=?, additional_info=?,
             resolved_date=?, status=?, updated_at=datetime('now')
             WHERE id=?''',
             (
@@ -267,6 +291,7 @@ def escalated_edit(item_id):
                 request.form.get('office', ''),
                 request.form['description'],
                 request.form.get('reported_by', ''),
+                request.form.get('contact_email', ''),
                 request.form.get('escalated_by', ''),
                 request.form.get('ticket_number', ''),
                 request.form.get('escalation_date', '') or None,
@@ -277,6 +302,13 @@ def escalated_edit(item_id):
             ))
         db.commit()
         db.close()
+        notify_ticket(
+            config.ESCALATED_LABEL_SINGULAR, 'updated',
+            request.form['description'],
+            contact_email=request.form.get('contact_email', ''),
+            reported_by=request.form.get('reported_by', ''),
+            ticket_number=request.form.get('ticket_number', ''),
+        )
         flash(f'{config.ESCALATED_LABEL_SINGULAR} updated.', 'success')
         return redirect(url_for('escalated_list'))
     item = db.execute("SELECT * FROM escalated_tickets WHERE id=?", (item_id,)).fetchone()
@@ -294,10 +326,18 @@ def escalated_edit(item_id):
 @login_required
 def walkin_resolve(item_id):
     db = get_db()
+    ticket = db.execute("SELECT description, contact_email, reported_by FROM walkin_tickets WHERE id=?", (item_id,)).fetchone()
     db.execute("UPDATE walkin_tickets SET status='RESOLVED', resolved_date=?, updated_at=datetime('now') WHERE id=?",
                (date.today().isoformat(), item_id))
     db.commit()
     db.close()
+    if ticket:
+        notify_ticket(
+            config.WALKIN_LABEL_SINGULAR, 'resolved',
+            ticket['description'],
+            contact_email=ticket['contact_email'] or '',
+            reported_by=ticket['reported_by'] or '',
+        )
     flash('Marked as resolved.', 'success')
     return redirect(request.referrer or url_for('walkin_list'))
 
@@ -306,10 +346,19 @@ def walkin_resolve(item_id):
 @login_required
 def escalated_resolve(item_id):
     db = get_db()
+    ticket = db.execute("SELECT description, contact_email, reported_by, ticket_number FROM escalated_tickets WHERE id=?", (item_id,)).fetchone()
     db.execute("UPDATE escalated_tickets SET status='RESOLVED', resolved_date=?, updated_at=datetime('now') WHERE id=?",
                (date.today().isoformat(), item_id))
     db.commit()
     db.close()
+    if ticket:
+        notify_ticket(
+            config.ESCALATED_LABEL_SINGULAR, 'resolved',
+            ticket['description'],
+            contact_email=ticket['contact_email'] or '',
+            reported_by=ticket['reported_by'] or '',
+            ticket_number=ticket['ticket_number'] or '',
+        )
     flash('Marked as resolved.', 'success')
     return redirect(request.referrer or url_for('escalated_list'))
 
@@ -413,18 +462,19 @@ def export_excel():
     # --- Walk-in Tickets sheet ---
     ws_walkin = wb.create_sheet(config.WALKIN_LABEL)
     ws_walkin.append(["DATE", "CATEGORY", "LOCATION", "DESCRIPTION", "REPORTED BY",
-                      "ADDITIONAL INFO", "ASSIGNED TO", "RESOLVED DATE", "STATUS"])
+                      "CONTACT EMAIL", "ADDITIONAL INFO", "ASSIGNED TO", "RESOLVED DATE", "STATUS"])
     style_header(ws_walkin)
 
     rows = db.execute(f"SELECT * FROM walkin_tickets{where_walkin} ORDER BY date", params).fetchall()
     for r in rows:
         ws_walkin.append([r['date'], r['category'], r['location'], r['description'],
-                         r['reported_by'], r['additional_info'], r['assigned_to'],
+                         r['reported_by'], r['contact_email'], r['additional_info'], r['assigned_to'],
                          r['resolved_date'], r['status']])
 
     # --- Escalated Tickets sheet ---
     ws_esc = wb.create_sheet(config.ESCALATED_LABEL)
     ws_esc.append(["DATE", "AREA", "BUILDING", "OFFICE", "DESCRIPTION", "REPORTED BY",
+                    "CONTACT EMAIL",
                     config.ESCALATED_RAISED_BY_LABEL.upper(), config.ESCALATED_NUMBER_LABEL.upper(),
                     config.ESCALATED_DATE_LABEL.upper(), "ADDITIONAL INFO",
                     "RESOLVED DATE", "STATUS"])
@@ -433,7 +483,7 @@ def export_excel():
     rows = db.execute(f"SELECT * FROM escalated_tickets{where_escalated} ORDER BY date", params).fetchall()
     for r in rows:
         ws_esc.append([r['date'], r['area'], r['building'], r['office'], r['description'],
-                        r['reported_by'], r['escalated_by'], r['ticket_number'], r['escalation_date'],
+                        r['reported_by'], r['contact_email'], r['escalated_by'], r['ticket_number'], r['escalation_date'],
                         r['additional_info'], r['resolved_date'], r['status']])
 
     db.close()
