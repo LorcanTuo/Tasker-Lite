@@ -6,6 +6,8 @@ A lightweight, configurable **IT ticket tracker** built with Flask and SQLite. D
 ![Flask](https://img.shields.io/badge/Flask-3.x-lightgrey?logo=flask)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+> **📖 [Full documentation available on the Wiki](https://github.com/LorcanTuo/Tasker-Lite/wiki)**
+
 ## Features
 
 - **Walk-in / Phone-in Tickets** — Log day-to-day requests from users who walk in or call.
@@ -76,6 +78,19 @@ See the file for the full list of options.
 - **Database** — SQLite (WAL mode, zero config)
 - **Frontend** — Bootstrap 5.3, Bootstrap Icons, vanilla JS
 - **Analytics** — R + ggplot2 (optional)
+
+## Wiki
+
+For detailed guides, visit the **[Wiki](https://github.com/LorcanTuo/Tasker-Lite/wiki)**:
+
+- [Getting Started](https://github.com/LorcanTuo/Tasker-Lite/wiki/Getting-Started) — Installation and first run
+- [Configuration](https://github.com/LorcanTuo/Tasker-Lite/wiki/Configuration) — Customise branding, labels, statuses, and more
+- [Walk-in Tickets](https://github.com/LorcanTuo/Tasker-Lite/wiki/Walk-in-Tickets) — Creating and managing walk-in tickets
+- [Escalated Tickets](https://github.com/LorcanTuo/Tasker-Lite/wiki/Escalated-Tickets) — Tracking externally escalated issues
+- [Reports and Analytics](https://github.com/LorcanTuo/Tasker-Lite/wiki/Reports-and-Analytics) — Generating reports and R charts
+- [User Management](https://github.com/LorcanTuo/Tasker-Lite/wiki/User-Management) — Adding users and changing passwords
+- [Import and Export](https://github.com/LorcanTuo/Tasker-Lite/wiki/Import-and-Export) — Bulk importing and exporting ticket data
+- [Database Schema](https://github.com/LorcanTuo/Tasker-Lite/wiki/Database-Schema) — SQLite table structure and indexes
 
 ## License
 
