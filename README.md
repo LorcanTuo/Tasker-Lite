@@ -8,6 +8,15 @@ A lightweight, configurable **IT ticket tracker** built with Flask and SQLite. D
 
 > **📖 [Full documentation available on the Wiki](https://github.com/LorcanTuo/Tasker-Lite/wiki)**
 
+> **⚠️ Experimental Branch (`docker`)** — This branch adds Docker support for containerised deployment. These changes are experimental and may be subject to change or removal. Do not rely on this setup for production without thorough testing.
+
+## What's New on This Branch
+
+- **Dockerfile** — Python 3.12-slim image with a non-root user and built-in healthcheck.
+- **docker-compose.yml** — Single-command deployment with a named volume for database persistence.
+- **Environment Variable Config** — `SECRET_KEY`, `HOST`, `PORT`, and `DEBUG` can now be set via environment variables (falls back to `config.py` defaults for local dev).
+- **Volume-Mounted Database** — The SQLite database path is configurable via `DATABASE_PATH` so data survives container restarts.
+
 ## Features
 
 - **Walk-in / Phone-in Tickets** — Log day-to-day requests from users who walk in or call.
@@ -21,13 +30,15 @@ A lightweight, configurable **IT ticket tracker** built with Flask and SQLite. D
 
 ## Quick Start
 
+### Local Development
+
 ```bash
 # 1. Clone the repo
-git clone https://github.com/<you>/it-tasker.git
-cd it-tasker
+git clone https://github.com/LorcanTuo/Tasker-Lite.git
+cd Tasker-Lite
 
 # 2. Install dependencies
-pip install flask flask-login werkzeug openpyxl
+pip install -r requirements.txt
 
 # 3. (Optional) Install R + ggplot2 for analytics charts
 # brew install r          # macOS
@@ -35,6 +46,22 @@ pip install flask flask-login werkzeug openpyxl
 
 # 4. Run
 python app.py
+```
+
+### Docker
+
+```bash
+# Build and run with Docker Compose
+docker compose up -d
+
+# Or build and run manually
+docker build -t it-tasker .
+docker run -d -p 5001:5001 \
+  -e SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))") \
+  -e HOST=0.0.0.0 \
+  -e DEBUG=false \
+  -v tasker-data:/app/data \
+  it-tasker
 ```
 
 Open **http://127.0.0.1:5001** — default login is `admin` / `admin123`.
@@ -61,14 +88,30 @@ All settings live in [`config.py`](config.py). Edit it to match your organisatio
 
 See the file for the full list of options.
 
+### Environment Variables (this branch only)
+
+When running in Docker (or any environment), the following settings can be overridden via environment variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `SECRET_KEY` | `"change-me-to-something-random"` | Flask session signing key |
+| `HOST` | `"127.0.0.1"` | Bind address (`0.0.0.0` for Docker) |
+| `PORT` | `5001` | HTTP port |
+| `DEBUG` | `"true"` | Enable debug mode (`"false"` for production) |
+| `DATABASE_PATH` | App directory | Directory for the SQLite database file |
+
 ## Project Structure
 
 ```
-├── app.py           # Flask routes and business logic
-├── config.py        # All configurable settings
-├── models.py        # SQLite schema and database helpers
-├── report.R         # Optional R analytics chart generator
-├── templates/       # Jinja2 HTML templates (Bootstrap 5)
+├── app.py              # Flask routes and business logic
+├── config.py           # All configurable settings (env var aware)
+├── models.py           # SQLite schema and database helpers
+├── requirements.txt    # Python dependencies
+├── report.R            # Optional R analytics chart generator
+├── Dockerfile          # Container image definition
+├── docker-compose.yml  # Single-command container deployment
+├── .dockerignore       # Files excluded from the Docker build
+├── templates/          # Jinja2 HTML templates (Bootstrap 5)
 └── README.md
 ```
 
